@@ -1,4 +1,5 @@
 import os
+import csv
 from datetime import datetime
 
 productos = []
@@ -34,9 +35,11 @@ def generar_factura():
     total = subtotal_descuento + iva
 
     fecha = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    nombre_archivo = f"facturas/factura_{fecha}.txt"
+    nombre_txt = f"facturas/factura_{fecha}.txt"
+    nombre_csv = f"facturas/factura_{fecha}.csv"
 
-    with open(nombre_archivo, "w", encoding="utf-8") as f:
+    # Guardar en .txt
+    with open(nombre_txt, "w", encoding="utf-8") as f:
         f.write("FACTURA\n")
         f.write("--------\n")
         for prod in productos:
@@ -48,7 +51,23 @@ def generar_factura():
         f.write(f"IVA (16%): ${iva:.2f}\n")
         f.write(f"TOTAL: ${total:.2f}\n")
 
-    print(f"Factura generada: {nombre_archivo}")
+    # Guardar en .csv
+    with open(nombre_csv, "w", newline='', encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["Producto", "Precio Unitario", "Cantidad", "Total"])
+        for prod in productos:
+            total_prod = prod["precio"] * prod["cantidad"]
+            writer.writerow([prod["nombre"], prod["precio"], prod["cantidad"], total_prod])
+        writer.writerow([])
+        writer.writerow(["Subtotal", subtotal])
+        writer.writerow(["Descuento", f"-{monto_descuento}"])
+        writer.writerow(["Subtotal con descuento", subtotal_descuento])
+        writer.writerow(["IVA (16%)", iva])
+        writer.writerow(["TOTAL", total])
+
+    print(f"\nFactura generada en:")
+    print(f" - {nombre_txt}")
+    print(f" - {nombre_csv}")
     productos.clear()
 
 while True:
