@@ -21,9 +21,17 @@ def generar_factura():
         print("No hay productos para facturar.")
         return
 
+    try:
+        descuento = float(input("¿Qué porcentaje de descuento aplicar? (Ej: 10 para 10%) [0 si ninguno]: "))
+    except ValueError:
+        print("Descuento inválido. Se aplicará 0%.")
+        descuento = 0.0
+
     subtotal = sum(p["precio"] * p["cantidad"] for p in productos)
-    iva = subtotal * 0.16
-    total = subtotal + iva
+    monto_descuento = subtotal * (descuento / 100)
+    subtotal_descuento = subtotal - monto_descuento
+    iva = subtotal_descuento * 0.16
+    total = subtotal_descuento + iva
 
     fecha = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     nombre_archivo = f"facturas/factura_{fecha}.txt"
@@ -35,6 +43,8 @@ def generar_factura():
             f.write(f"{prod['nombre']} - ${prod['precio']} x {prod['cantidad']}\n")
         f.write("\n")
         f.write(f"Subtotal: ${subtotal:.2f}\n")
+        f.write(f"Descuento ({descuento}%): -${monto_descuento:.2f}\n")
+        f.write(f"Subtotal con descuento: ${subtotal_descuento:.2f}\n")
         f.write(f"IVA (16%): ${iva:.2f}\n")
         f.write(f"TOTAL: ${total:.2f}\n")
 
